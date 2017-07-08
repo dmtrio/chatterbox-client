@@ -19,7 +19,6 @@ app.init = function() {
   app.username = window.location.href.split('=')[1];
   // this.friends = [];
   this.fetch();
-  
 };
 
 app.send = function(message) {
@@ -45,7 +44,6 @@ app.send = function(message) {
 };
 
 app.fetch = function(room = 'lobby') {
-  app.clearMessages();
   var messages = [];
   
   $.ajax({
@@ -78,6 +76,8 @@ app.clearMessages = function() {
 };
 
 app.renderMessage = function(message) {
+  message = app.sanitizeInput(message);
+  
   var isFriend = '';
   if (app.friends.includes(message.username)) {
     isFriend = ' friend';
@@ -97,14 +97,42 @@ app.renderMessage = function(message) {
   
   $messageDiv.html($user + $messageText);
   
-  
-  
-  // var $message = $('<div class="message' + isFriend + '"><h4 class="username" value="' + message.username + '">' + message.username + '</h4>'
-  //   + '<p>' + message.text + '</p></div>'
-  // );
-  
-  
   $('#chats').append($messageDiv);
+};
+
+// tagBody, tagOrComment, and removeTags taken from
+// https://stackoverflow.com/a/430240
+app.sanitizeInput = function(message) {
+  var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
+
+  var tagOrComment = new RegExp(
+    '<(?:'
+    // Comment body.
+    + '!--(?:(?:-*[^->])*--+|-?)'
+    // Special "raw text" elements whose content should be elided.
+    + '|script\\b' + tagBody + '>[\\s\\S]*?</script\\s*'
+    + '|style\\b' + tagBody + '>[\\s\\S]*?</style\\s*'
+    // Regular name
+    + '|/?[a-z]'
+    + tagBody
+    + ')>',
+    'gi'
+  );
+  
+  var removeTags = function (html) {
+    var oldHtml;
+    do {
+      oldHtml = html;
+      html = html.replace(tagOrComment, '');
+    } while (html !== oldHtml);
+    return html.replace(/</g, '&lt;');
+  };
+  
+  message.username = removeTags(message.username);
+  console.log('username: ' + message.username);
+  message.text = removeTags(message.text);
+  console.log('message text: ' + message.text);
+  return message;
 };
 
 app.renderRoom = function(room) {
@@ -115,6 +143,7 @@ app.renderRoom = function(room) {
 app.handleUsernameClick = function(element) {
   var friend = element.text();
   app.friends.push(friend);
+  app.clearMessages();
   app.fetch(app.currentRoom);
 };
 
@@ -128,7 +157,7 @@ app.handleSubmit = function(messageText) {
   app.send(message);
 };
 
-app.init();
+// app.init();
 
 $( document ).ready(function() {
   
@@ -139,21 +168,14 @@ $( document ).ready(function() {
       
     } else {
       app.currentRoom = $(this).val();
+      app.clearMessages();
       app.fetch(app.currentRoom);
     } 
   });
   
-  $('.submit').on('click', function(event) {
+  $('#send').submit(function(event) {
     event.preventDefault();
     app.handleSubmit($('#message').val());
-    // var messageText = $('#new-message-text').val();
-    // var message = {
-    //   username: app.username,
-    //   text: messageText,
-    //   roomname: app.currentRoom
-    // };
-    // app.send(message);
-    
   });
     
   $('#chats').on('click', '.username', function(event) {

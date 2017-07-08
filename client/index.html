@@ -30,16 +30,19 @@
       <h1>chatterbox</h1>
       <!-- Your HTML goes here! -->
       <select id="roomSelect">
-        <option class="createRoom" value="createRoom">New room...</option>
+        <option class="createRoom" selected="selected" value="createRoom">New room...</option>
       </select>
-    </div>
-    <div id="send">
-      <form id="new-message-form" action="" method="post">
-        New Message: <input id="message" type="text" name="message">
-        <input type="submit" class="submit">
+      <form action="#" id="send" method="post">
+        New Message: <input type="text" name="message" id="message"/>
+        <input type="submit" value="Submit" name="submit" class="submit"/>
       </form>
+      <div id="chats"></div>
     </div>
-    <div id="chats"></div>
     <script src="scripts/app.js"></script>
+    <script>
+      $(function() {
+        app.init();
+      });
+    </script>
   </body>
 </html>

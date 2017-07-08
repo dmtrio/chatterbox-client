@@ -14,8 +14,11 @@
         if (newSearch !== '' & newSearch !== '?') {
           newSearch += '&';
         }
-        newSearch += 'username=' + (prompt('What is your name?') || 'anonymous');
+        var username = prompt('What is your name?');
+        console.log(username);
+        newSearch += 'username=' + username || 'anonymous';
         window.location.search = newSearch;
+        window.localStorage.push(username);
       }
     </script>
     <!-- your scripts -->
@@ -26,6 +29,15 @@
     <div id="main">
       <h1>chatterbox</h1>
       <!-- Your HTML goes here! -->
+      <select id="roomSelect">
+        <option class="createRoom" value="createRoom">New room...</option>
+      </select>
+    </div>
+    <div id="write-message">
+      <form id="new-message-form" action="/app.send" method="post">
+        New Message: <input type="text" name="message">
+        <input type="submit" value="Submit">
+      </form>
     </div>
     <div id="chats"></div>
   </body>

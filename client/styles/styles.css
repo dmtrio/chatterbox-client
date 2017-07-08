@@ -83,9 +83,9 @@ form input[type=text] {
     padding: 10px;
 }
 
-.friend {
-    color: #fff;
-    background-color: #0090da;
+.friend h4{
+    color: #0090da;
+
 }
 
 h4:hover {

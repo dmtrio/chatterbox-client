@@ -12,12 +12,14 @@ var app = {};
 app.friends = [];
 app.rooms = [];
 app.currentRoom = 'lobby';
-app.username = '';
+app.username = 'anonymous';
 app.server = 'http://parse.atx.hackreactor.com/chatterbox/classes/messages';
 
 app.init = function() {
-  app.username = window.location.href.split('=')[1];
-  // this.friends = [];
+  if (window.location.href.split('html')[1]) {
+    app.username = window.location.href.split('=')[1].split('%20').join(' ');  
+  }
+  
   this.fetch();
 };
 
@@ -136,8 +138,10 @@ app.sanitizeInput = function(message) {
 };
 
 app.renderRoom = function(room) {
-  var $option = $('<option>' + room + '</option>');
+  var $option = $('<option value="' + room + '">' + room + '</option>');
   $('#roomSelect').append($option);
+  $('#roomSelect option[value="lobby"]').prop('selected', true);
+
 };
 
 app.handleUsernameClick = function(element) {
@@ -157,20 +161,24 @@ app.handleSubmit = function(messageText) {
   app.send(message);
 };
 
-// app.init();
+app.renderCurrentRoom = function(room) {
+  $('#roomSelect option[value="' + room + '"]').prop('selected', true);
+  app.clearMessages();
+  app.fetch(app.currentRoom);
+};
 
 $( document ).ready(function() {
   
   $('#roomSelect').change(function() {
     if ($(this).val() === 'createRoom') {
       var newRoom = prompt('Please name your new chatroom');
+      app.currentRoom = newRoom;
       app.renderRoom(newRoom);
-      
+      app.rooms.push(newRoom);
     } else {
       app.currentRoom = $(this).val();
-      app.clearMessages();
-      app.fetch(app.currentRoom);
     } 
+    app.renderCurrentRoom(app.currentRoom);
   });
   
   $('#send').submit(function(event) {

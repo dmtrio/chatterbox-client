@@ -78,7 +78,8 @@ app.clearMessages = function() {
 };
 
 app.renderMessage = function(message) {
-  message = app.sanitizeInput(message);
+  message.username = app.sanitizeInput(message.username);
+  message.text = app.sanitizeInput(message.text);
   
   var isFriend = '';
   if (app.friends.includes(message.username)) {
@@ -88,7 +89,6 @@ app.renderMessage = function(message) {
   
   var $messageDiv;
   if (app.friends.includes(message.username)) {
-    console.log('found friend');
     $messageDiv = $('<div class="message friend"></div>');
   } else {
     $messageDiv = $('<div class="message"></div>');
@@ -104,7 +104,7 @@ app.renderMessage = function(message) {
 
 // tagBody, tagOrComment, and removeTags taken from
 // https://stackoverflow.com/a/430240
-app.sanitizeInput = function(message) {
+app.sanitizeInput = function(input) {
   var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
 
   var tagOrComment = new RegExp(
@@ -130,14 +130,15 @@ app.sanitizeInput = function(message) {
     return html.replace(/</g, '&lt;');
   };
   
-  message.username = removeTags(message.username);
-  console.log('username: ' + message.username);
-  message.text = removeTags(message.text);
-  console.log('message text: ' + message.text);
-  return message;
+  if (!input) {
+    return;
+  }
+  
+  return removeTags(input);
 };
 
 app.renderRoom = function(room) {
+  room = app.sanitizeInput(room);
   var $option = $('<option value="' + room + '">' + room + '</option>');
   $('#roomSelect').append($option);
   $('#roomSelect option[value="lobby"]').prop('selected', true);

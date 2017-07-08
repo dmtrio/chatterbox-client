@@ -23,7 +23,7 @@
     </script>
     <!-- your scripts -->
     <script src="env/config.js"></script>
-    <script src="scripts/app.js"></script>
+<!--     <script src="scripts/app.js"></script> -->
   </head>
   <body>
     <div id="main">
@@ -33,12 +33,13 @@
         <option class="createRoom" value="createRoom">New room...</option>
       </select>
     </div>
-    <div id="write-message">
-      <form id="new-message-form" action="/app.send" method="post">
-        New Message: <input type="text" name="message">
-        <input type="submit" value="Submit">
+    <div id="send">
+      <form id="new-message-form" action="" method="post">
+        New Message: <input id="message" type="text" name="message">
+        <input type="submit" class="submit">
       </form>
     </div>
     <div id="chats"></div>
+    <script src="scripts/app.js"></script>
   </body>
 </html>

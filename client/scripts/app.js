@@ -11,12 +11,15 @@ var app = {};
 
 app.friends = [];
 app.rooms = [];
-
+app.currentRoom = 'lobby';
+app.username = '';
 app.server = 'http://parse.atx.hackreactor.com/chatterbox/classes/messages';
 
 app.init = function() {
-  this.friends = [];
+  app.username = window.location.href.split('=')[1];
+  // this.friends = [];
   this.fetch();
+  
 };
 
 app.send = function(message) {
@@ -26,6 +29,8 @@ app.send = function(message) {
     data: JSON.stringify(message),
     contentType: 'application/json',
     success: function (data) {
+      console.log('data:', data);
+      console.log(message);
       var $message = $('<div><h4 class="username">' + message.username + '</h4>'
         + '<p>' + message.text + '</p></div>'
       );
@@ -40,13 +45,14 @@ app.send = function(message) {
 };
 
 app.fetch = function(room = 'lobby') {
-
+  app.clearMessages();
   var messages = [];
   
   $.ajax({
     url: app.server,
     type: 'GET',
     contentType: 'application/json',
+    data: {'order': '-createdAt'},
     success: function(data) {
       messages = data.results;
       for (message of messages) {
@@ -72,11 +78,33 @@ app.clearMessages = function() {
 };
 
 app.renderMessage = function(message) {
-  var $message = $('<div><h4 class="username">' + message.username + '</h4>'
-    + '<p>' + message.text + '</p></div>'
-  );
+  var isFriend = '';
+  if (app.friends.includes(message.username)) {
+    isFriend = ' friend';
+    console.log(isFriend);
+  }
   
-  $('#chats').append($message);
+  var $messageDiv;
+  if (app.friends.includes(message.username)) {
+    console.log('found friend');
+    $messageDiv = $('<div class="message friend"></div>');
+  } else {
+    $messageDiv = $('<div class="message"></div>');
+  }
+  
+  var $user = '<h4 class="username">' + message.username + '</h4>';
+  var $messageText = '<p>' + message.text + '</p>';
+  
+  $messageDiv.html($user + $messageText);
+  
+  
+  
+  // var $message = $('<div class="message' + isFriend + '"><h4 class="username" value="' + message.username + '">' + message.username + '</h4>'
+  //   + '<p>' + message.text + '</p></div>'
+  // );
+  
+  
+  $('#chats').append($messageDiv);
 };
 
 app.renderRoom = function(room) {
@@ -84,13 +112,20 @@ app.renderRoom = function(room) {
   $('#roomSelect').append($option);
 };
 
-app.handleUsernameClick = function() {
-  
-    
+app.handleUsernameClick = function(element) {
+  var friend = element.text();
+  app.friends.push(friend);
+  app.fetch(app.currentRoom);
 };
 
-app.handleSubmit = function() {
-    
+app.handleSubmit = function(messageText) {
+  var message = {
+    username: app.username,
+    text: messageText,
+    roomname: app.currentRoom
+  };
+  
+  app.send(message);
 };
 
 app.init();
@@ -103,14 +138,26 @@ $( document ).ready(function() {
       app.renderRoom(newRoom);
       
     } else {
-      var currentRoom = $(this).val();
-      app.clearMessages();
-      app.fetch(currentRoom);
+      app.currentRoom = $(this).val();
+      app.fetch(app.currentRoom);
     } 
   });
   
-  $('#new-message-form').submit(function() {
+  $('.submit').on('click', function(event) {
+    event.preventDefault();
+    app.handleSubmit($('#message').val());
+    // var messageText = $('#new-message-text').val();
+    // var message = {
+    //   username: app.username,
+    //   text: messageText,
+    //   roomname: app.currentRoom
+    // };
+    // app.send(message);
     
+  });
+    
+  $('#chats').on('click', '.username', function(event) {
+    app.handleUsernameClick($(this));
   });
 });
 
